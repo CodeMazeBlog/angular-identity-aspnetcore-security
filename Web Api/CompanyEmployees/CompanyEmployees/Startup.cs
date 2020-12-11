@@ -1,7 +1,9 @@
 using AutoMapper;
 using CompanyEmployees.Extensions;
+using CompanyEmployees.JwtFeatures;
 using Entities;
 using Entities.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -9,8 +11,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using NLog;
 using System.IO;
+using System.Text;
 
 namespace CompanyEmployees
 {
@@ -43,6 +47,28 @@ namespace CompanyEmployees
             })
              .AddEntityFrameworkStores<RepositoryContext>();
 
+            var jwtSettings = Configuration.GetSection("JwtSettings");
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = jwtSettings.GetSection("validIssuer").Value,
+                    ValidAudience = jwtSettings.GetSection("validAudience").Value,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.GetSection("securityKey").Value))
+                };
+            });
+
+            services.AddScoped<JwtHandler>();
+
             services.AddControllers();
         }
 
@@ -70,7 +96,8 @@ namespace CompanyEmployees
 
             app.UseRouting();
 
-            
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
