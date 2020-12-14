@@ -31,14 +31,22 @@ export class ErrorHandlerService implements HttpInterceptor {
     else if(error.status === 401) {
       return this.handleUnauthorized(error);
     }
+    else if(error.status === 403) {
+      return this.handleForbidden(error);
+    }
+  }
+
+  private handleForbidden = (error: HttpErrorResponse) => {
+    this._router.navigate(["/forbidden"], { queryParams: { returnUrl: this._router.url }});
+    return "Forbidden";
   }
 
   private handleUnauthorized = (error: HttpErrorResponse) => {
     if(this._router.url === '/authentication/login') {
-      return 'Authentication failed. Wrong Username or Password';
+      return 'Authenitcation failed. Wrong Username or Password';
     }
     else {
-      this._router.navigate(['/authentication/login']);
+      this._router.navigate(['/authentication/login'], { queryParams: { returnUrl: this._router.url }});
       return error.message;
     }
   }
