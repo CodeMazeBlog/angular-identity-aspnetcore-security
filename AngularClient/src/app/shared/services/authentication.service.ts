@@ -1,3 +1,5 @@
+import { ResetPasswordDto } from './../../_interfaces/resetPassword/resetPasswordDto.model';
+import { ForgotPasswordDto } from '../../_interfaces/resetPassword/forgotPasswordDto.model';
 import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
 import { RegistrationResponseDto } from './../../_interfaces/response/registrationResponseDto.model';
 import { UserForAuthenticationDto } from './../../_interfaces/user/userForAuthenticationDto.model';
@@ -28,6 +30,14 @@ export class AuthenticationService {
   public logout = () => {
     localStorage.removeItem("token");
     this.sendAuthStateChangeNotification(false);
+  }
+
+  public forgotPassword = (route: string, body: ForgotPasswordDto) => {
+    return this._http.post(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+  }
+
+  public resetPassword = (route: string, body: ResetPasswordDto) => {
+    return this._http.post(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
   }
 
   public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {

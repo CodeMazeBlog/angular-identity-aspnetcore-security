@@ -25,6 +25,9 @@
                     <em *ngIf="validateControl('password') && hasError('password', 'required')">Password is required</em>
                 </div>
             </div>
+            <div>
+                <a [routerLink]="['/authentication/forgotpassword']"> Forgot Password </a>
+            </div>
             <br>
             <div class="form-group row">
                 <div class="col-md-1">
