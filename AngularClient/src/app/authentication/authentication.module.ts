@@ -6,9 +6,10 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { LoginComponent } from './login/login.component';
 import { ForgotPasswordComponent } from './forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './reset-password/reset-password.component';
+import { EmailConfirmationComponent } from './email-confirmation/email-confirmation.component';
 
 @NgModule({
-  declarations: [RegisterUserComponent, LoginComponent, ForgotPasswordComponent, ResetPasswordComponent],
+  declarations: [RegisterUserComponent, LoginComponent, ForgotPasswordComponent, ResetPasswordComponent, EmailConfirmationComponent],
   imports: [
     CommonModule,
     ReactiveFormsModule,
@@ -16,7 +17,8 @@ import { ResetPasswordComponent } from './reset-password/reset-password.componen
       { path: 'register', component: RegisterUserComponent },
       { path: 'login', component: LoginComponent },
       { path: 'forgotpassword', component: ForgotPasswordComponent },
-      { path: 'resetpassword', component: ResetPasswordComponent }
+      { path: 'resetpassword', component: ResetPasswordComponent },
+      { path: 'emailconfirmation', component: EmailConfirmationComponent }
     ])
   ]
 })
