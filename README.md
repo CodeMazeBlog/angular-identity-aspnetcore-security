@@ -1,3 +1,3 @@
-# Angular Email Confirmation with ASP.NET Core Identity
-## https://code-maze.com/angular-email-confirmation-aspnet-identity
-This repo contains the source code for the "Angular Email Confirmation with ASP.NET Core Identity" article on "Code Maze"
+# User Lockout Functionality with Angular and ASP.NET Core Identity
+## https://code-maze.com/user-lockout-functionality-with-angular-and-asp-net-core-identity
+This repo contains the source code for the "User Lockout Functionality with Angular and ASP.NET Core Identity" article on "Code Maze"
