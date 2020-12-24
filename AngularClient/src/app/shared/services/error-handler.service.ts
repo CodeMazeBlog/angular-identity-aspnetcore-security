@@ -42,7 +42,7 @@ export class ErrorHandlerService implements HttpInterceptor {
   }
 
   private handleUnauthorized = (error: HttpErrorResponse) => {
-    if(this._router.url === '/authentication/login') {
+    if(this._router.url.startsWith('/authentication/login')) {
       return error.error.errorMessage;
     }
     else {

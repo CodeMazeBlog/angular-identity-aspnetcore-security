@@ -8,5 +8,6 @@ namespace Entities.DTO
         public string Email { get; set; }
         [Required(ErrorMessage = "Password is required.")]
         public string Password { get; set; }
+        public string clientURI { get; set; }
     }
 }
