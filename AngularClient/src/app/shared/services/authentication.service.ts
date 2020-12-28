@@ -1,3 +1,4 @@
+import { TwoFactorDto } from './../../_interfaces/twoFactor/twoFactorDto.model';
 import { ResetPasswordDto } from './../../_interfaces/resetPassword/resetPasswordDto.model';
 import { ForgotPasswordDto } from '../../_interfaces/resetPassword/forgotPasswordDto.model';
 import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
@@ -47,6 +48,10 @@ export class AuthenticationService {
     params = params.append('email', email);
 
     return this._http.get(this.createCompleteRoute(route, this._envUrl.urlAddress), { params: params });
+  }
+
+  public twoStepLogin = (route: string, body: TwoFactorDto) => {
+    return this._http.post<AuthResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
   }
 
   public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {
