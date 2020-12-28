@@ -1,3 +1,6 @@
+import { TwoFactorDto } from './../../_interfaces/twoFactor/twoFactorDto.model';
+import { ResetPasswordDto } from './../../_interfaces/resetPassword/resetPasswordDto.model';
+import { ForgotPasswordDto } from '../../_interfaces/resetPassword/forgotPasswordDto.model';
 import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
 import { Injectable } from '@angular/core';
 import { UserForRegistrationDto } from './../../_interfaces/user/userForRegistrationDto.model'; 
@@ -51,6 +54,30 @@ export class AuthenticationService {
   public logout = () => {
     localStorage.removeItem("token");
     this.sendAuthStateChangeNotification(false);
+  }
+
+  public forgotPassword = (route: string, body: ForgotPasswordDto) => {
+    return this._http.post(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+  }
+
+  public resetPassword = (route: string, body: ResetPasswordDto) => {
+    return this._http.post(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+  }
+
+  public confirmEmail = (route: string, token: string, email: string) => {
+    let params = new HttpParams({ encoder: new CustomEncoder() })
+    params = params.append('token', token);
+    params = params.append('email', email);
+
+    return this._http.get(this.createCompleteRoute(route, this._envUrl.urlAddress), { params: params });
+  }
+
+  public twoStepLogin = (route: string, body: TwoFactorDto) => {
+    return this._http.post<AuthResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+  }
+
+  public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {
+    this._authChangeSub.next(isAuthenticated);
   }
 
   public isUserAuthenticated = (): boolean => {

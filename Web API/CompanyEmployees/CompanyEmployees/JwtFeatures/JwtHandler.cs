@@ -20,7 +20,7 @@ namespace CompanyEmployees.JwtFeatures
             _userManager = userManager;
         }
 
-        public SigningCredentials GetSigningCredentials()
+        private SigningCredentials GetSigningCredentials()
         {
             var key = Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey").Value);
             var secret = new SymmetricSecurityKey(key);
@@ -28,7 +28,7 @@ namespace CompanyEmployees.JwtFeatures
             return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
         }
 
-        public async Task<List<Claim>> GetClaims(User user)
+        private async Task<List<Claim>> GetClaims(User user)
         {
             var claims = new List<Claim>
             {
@@ -44,7 +44,7 @@ namespace CompanyEmployees.JwtFeatures
             return claims;
         }
 
-        public JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
+        private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
             var tokenOptions = new JwtSecurityToken(
                 issuer: _jwtSettings["validIssuer"],
@@ -54,6 +54,16 @@ namespace CompanyEmployees.JwtFeatures
                 signingCredentials: signingCredentials);
 
             return tokenOptions;
+        }
+
+        public async Task<string> GenerateToken(User user)
+        {
+            var signingCredentials = GetSigningCredentials();
+            var claims = await GetClaims(user);
+            var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+            var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+
+            return token;
         }
     }
 }
