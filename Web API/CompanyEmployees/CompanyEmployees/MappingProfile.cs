@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
-using CompanyEmployees.Entities.DataTransferObjects;
-using CompanyEmployees.Entities.Models;
+using Entities.DataTransferObjects;
+using Entities.DTO;
+using Entities.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace CompanyEmployees
 {

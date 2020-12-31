@@ -15,7 +15,10 @@ import { MenuComponent } from './menu/menu.component';
 import { NotFoundComponent } from './error-pages/not-found/not-found.component';
 import { PrivacyComponent } from './privacy/privacy.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
- 
+
+import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
+import { GoogleLoginProvider } from 'angularx-social-login';
+
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
@@ -32,8 +35,7 @@ export function tokenGetter() {
   imports: [
     BrowserModule,
     HttpClientModule,
-    BrowserAnimationsModule,
-    CollapseModule.forRoot(),
+    SocialLoginModule,
     RouterModule.forRoot([
       { path: 'home', component: HomeComponent },
       { path: 'company', loadChildren: () => import('./company/company.module').then(m => m.CompanyModule), canActivate: [AuthGuard] },
@@ -57,6 +59,20 @@ export function tokenGetter() {
       provide: HTTP_INTERCEPTORS,
       useClass: ErrorHandlerService,
       multi: true
+    },
+    {
+      provide: 'SocialAuthServiceConfig',
+      useValue: {
+        autoLogin: false,
+        providers: [
+          {
+            id: GoogleLoginProvider.PROVIDER_ID,
+            provider: new GoogleLoginProvider(
+              '883654869277-m2mlgsroh8vsmt0tg82lmo4cnt0cuqs3.apps.googleusercontent.com'
+            )
+          },
+        ],
+      } as SocialAuthServiceConfig
     }
   ],
   bootstrap: [AppComponent]
