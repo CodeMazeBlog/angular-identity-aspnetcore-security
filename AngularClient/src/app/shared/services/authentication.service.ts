@@ -1,3 +1,4 @@
+import { ExternalAuthDto } from './../../_interfaces/externalAuth/externalAuthDto.model';
 import { TwoFactorDto } from './../../_interfaces/twoFactor/twoFactorDto.model';
 import { ResetPasswordDto } from './../../_interfaces/resetPassword/resetPasswordDto.model';
 import { ForgotPasswordDto } from '../../_interfaces/resetPassword/forgotPasswordDto.model';
@@ -11,6 +12,8 @@ import { EnvironmentUrlService } from './environment-url.service';
 import { Subject } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { CustomEncoder } from '../custom-encoder';
+import { SocialAuthService } from "angularx-social-login";
+import { GoogleLoginProvider } from "angularx-social-login";
 
 @Injectable({
   providedIn: 'root'
@@ -19,7 +22,8 @@ export class AuthenticationService {
   private _authChangeSub = new Subject<boolean>()
   public authChanged = this._authChangeSub.asObservable();
   
-  constructor(private _http: HttpClient, private _envUrl: EnvironmentUrlService, private _jwtHelper: JwtHelperService) {}
+  constructor(private _http: HttpClient, private _envUrl: EnvironmentUrlService, 
+    private _jwtHelper: JwtHelperService, private _externalAuthService: SocialAuthService) {}
 
   public registerUser = (route: string, body: UserForRegistrationDto) => {
     return this._http.post<RegistrationResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
@@ -51,6 +55,18 @@ export class AuthenticationService {
   }
 
   public twoStepLogin = (route: string, body: TwoFactorDto) => {
+    return this._http.post<AuthResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+  }
+
+  public signInWithGoogle = ()=> {
+    return this._externalAuthService.signIn(GoogleLoginProvider.PROVIDER_ID);
+  }
+
+  public signOutExternal = () => {
+    this._externalAuthService.signOut();
+  }
+
+  public externalLogin = (route: string, body: ExternalAuthDto) => {
     return this._http.post<AuthResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
   }
 
