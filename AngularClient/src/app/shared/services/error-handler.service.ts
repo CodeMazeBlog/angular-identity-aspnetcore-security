@@ -8,15 +8,15 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class ErrorHandlerService implements HttpInterceptor {
-
-  constructor(private _router: Router) { }
-
+  
+  constructor(private router: Router) { }
+  
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req)
     .pipe(
       catchError((error: HttpErrorResponse) => {
         let errorMessage = this.handleError(error);
-        return throwError(errorMessage);
+        return throwError(() => new Error(errorMessage));
       })
     )
   }
@@ -31,23 +31,23 @@ export class ErrorHandlerService implements HttpInterceptor {
   }
 
   private handleNotFound = (error: HttpErrorResponse): string => {
-    this._router.navigate(['/404']);
+    this.router.navigate(['/404']);
     return error.message;
   }
-
+  
   private handleBadRequest = (error: HttpErrorResponse): string => {
-    if(this._router.url === '/authentication/register'){
+    if(this.router.url === '/authentication/register'){
       let message = '';
       const values = Object.values(error.error.errors);
+
       values.map((m: string) => {
          message += m + '<br>';
       })
-
+      
       return message.slice(0, -4);
     }
     else{
       return error.error ? error.error : error.message;
     }
   }
-
 }

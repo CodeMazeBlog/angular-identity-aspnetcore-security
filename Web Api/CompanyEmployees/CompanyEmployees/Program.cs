@@ -1,26 +1,34 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using CompanyEmployees.Entities.Models;
+using CompanyEmployees.Extensions;
+using CompanyEmployees.Repository;
+using Microsoft.AspNetCore.Identity;
 
-namespace CompanyEmployees
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureCors();
+builder.Services.ConfigureIISIntegration();
+builder.Services.ConfigureSqlContext(builder.Configuration);
+builder.Services.ConfigureRepositoryManager();
+builder.Services.AddAutoMapper(typeof(Program));
+
+builder.Services.AddIdentity<User, IdentityRole>(opt =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    opt.Password.RequiredLength = 7;
+    opt.Password.RequireDigit = false;
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
-}
+    opt.User.RequireUniqueEmail = true;
+}).AddEntityFrameworkStores<RepositoryContext>();
+
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

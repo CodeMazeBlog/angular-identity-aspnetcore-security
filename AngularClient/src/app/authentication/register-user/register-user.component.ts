@@ -1,7 +1,8 @@
 import { PasswordConfirmationValidatorService } from './../../shared/custom-validators/password-confirmation-validator.service';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { UserForRegistrationDto } from './../../_interfaces/user/userForRegistrationDto.model';
 import { AuthenticationService } from './../../shared/services/authentication.service';
-import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -10,11 +11,12 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./register-user.component.css']
 })
 export class RegisterUserComponent implements OnInit {
-  public registerForm: FormGroup;
-  public errorMessage: string = '';
-  public showError: boolean;
+  registerForm: FormGroup;
+  errorMessage: string = '';
+  showError: boolean;
 
-  constructor(private _authService: AuthenticationService, private _passConfValidator: PasswordConfirmationValidatorService) { }
+  constructor(private authService: AuthenticationService, 
+    private passConfValidator: PasswordConfirmationValidatorService) { }
 
   ngOnInit(): void {
     this.registerForm = new FormGroup({
@@ -24,16 +26,16 @@ export class RegisterUserComponent implements OnInit {
       password: new FormControl('', [Validators.required]),
       confirm: new FormControl('')
     });
-    this.registerForm.get('confirm').setValidators([Validators.required,
-      this._passConfValidator.validateConfirmPassword(this.registerForm.get('password'))]);
+    this.registerForm.get('confirm').setValidators([Validators.required, 
+    this.passConfValidator.validateConfirmPassword(this.registerForm.get('password'))]);
   }
 
   public validateControl = (controlName: string) => {
-    return this.registerForm.controls[controlName].invalid && this.registerForm.controls[controlName].touched
+    return this.registerForm.get(controlName).invalid && this.registerForm.get(controlName).touched
   }
 
   public hasError = (controlName: string, errorName: string) => {
-    return this.registerForm.controls[controlName].hasError(errorName)
+    return this.registerForm.get(controlName).hasError(errorName)
   }
 
   public registerUser = (registerFormValue) => {
@@ -48,13 +50,13 @@ export class RegisterUserComponent implements OnInit {
       confirmPassword: formValues.confirm
     };
 
-    this._authService.registerUser("api/accounts/registration", user)
-    .subscribe(_ => {
-      console.log("Successful registration");
-    },
-    error => {
-      this.errorMessage = error;
-      this.showError = true;
+    this.authService.registerUser("api/accounts/registration", user)
+    .subscribe({
+      next: (_) => console.log("Successful registration"),
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = err.message;
+        this.showError = true;
+      }
     })
   }
 }
