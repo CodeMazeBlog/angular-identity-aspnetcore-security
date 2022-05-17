@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
+using CompanyEmployees.Entities.DataTransferObjects;
+using CompanyEmployees.Entities.Models;
 using CompanyEmployees.JwtFeatures;
-using Entities.DTO;
-using Entities.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CompanyEmployees.Controllers
 {
@@ -17,41 +12,39 @@ namespace CompanyEmployees.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly UserManager<User> _userManager; 
+        private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly JwtHandler _jwtHandler;
 
-        public AccountsController(UserManager<User> userManager, IMapper mapper, JwtHandler jwtHandler) 
+        public AccountsController(UserManager<User> userManager, IMapper mapper, JwtHandler jwtHandler)
         {
             _userManager = userManager;
             _mapper = mapper;
             _jwtHandler = jwtHandler;
         }
 
-        [HttpPost("Registration")] 
-        public async Task<IActionResult> RegisterUser([FromBody] UserForRegistrationDto userForRegistration) 
+        [HttpPost("Registration")]
+        public async Task<IActionResult> RegisterUser([FromBody] UserForRegistrationDto userForRegistration)
         {
-            if (userForRegistration == null || !ModelState.IsValid) 
-                return BadRequest(); 
-            
-            var user = _mapper.Map<User>(userForRegistration);
+            if (userForRegistration == null || !ModelState.IsValid)
+                return BadRequest();
 
-            var result = await _userManager.CreateAsync(user, userForRegistration.Password); 
-            if (!result.Succeeded) 
-            { 
-                var errors = result.Errors.Select(e => e.Description); 
-                
-                return BadRequest(new RegistrationResponseDto { Errors = errors }); 
+            var user = _mapper.Map<User>(userForRegistration);
+            var result = await _userManager.CreateAsync(user, userForRegistration.Password);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+
+                return BadRequest(new RegistrationResponseDto { Errors = errors });
             }
-            
-            return StatusCode(201); 
+
+            return StatusCode(201);
         }
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] UserForAuthenticationDto userForAuthentication)
         {
             var user = await _userManager.FindByNameAsync(userForAuthentication.Email);
-
             if (user == null || !await _userManager.CheckPasswordAsync(user, userForAuthentication.Password))
                 return Unauthorized(new AuthResponseDto { ErrorMessage = "Invalid Authentication" });
 

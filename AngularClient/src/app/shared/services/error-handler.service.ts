@@ -8,24 +8,24 @@ import { Router } from '@angular/router';
   providedIn: 'root'
 })
 export class ErrorHandlerService implements HttpInterceptor {
-
-  constructor(private _router: Router) { }
+  
+  constructor(private router: Router) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req)
     .pipe(
       catchError((error: HttpErrorResponse) => {
         let errorMessage = this.handleError(error);
-        return throwError(errorMessage);
+        return throwError(() => new Error(errorMessage));
       })
     )
   }
 
   private handleError = (error: HttpErrorResponse) : string => {
-    if(error.status === 404) {
+    if(error.status === 404){
       return this.handleNotFound(error);
     }
-    else if(error.status === 400) {
+    else if(error.status === 400){
       return this.handleBadRequest(error);
     }
     else if(error.status === 401) {
@@ -33,34 +33,34 @@ export class ErrorHandlerService implements HttpInterceptor {
     }
   }
 
+  private handleNotFound = (error: HttpErrorResponse): string => {
+    this.router.navigate(['/404']);
+    return error.message;
+  }
+  
   private handleUnauthorized = (error: HttpErrorResponse) => {
-    if(this._router.url === '/authentication/login') {
+    if(this.router.url === '/authentication/login') {
       return 'Authentication failed. Wrong Username or Password';
     }
     else {
-      this._router.navigate(['/authentication/login']);
+      this.router.navigate(['/authentication/login']);
       return error.message;
     }
   }
 
-  private handleNotFound = (error: HttpErrorResponse): string => {
-    this._router.navigate(['/404']);
-    return error.message;
-  }
-
   private handleBadRequest = (error: HttpErrorResponse): string => {
-    if(this._router.url === '/authentication/register'){
+    if(this.router.url === '/authentication/register'){
       let message = '';
       const values = Object.values(error.error.errors);
+
       values.map((m: string) => {
          message += m + '<br>';
       })
-
+      
       return message.slice(0, -4);
     }
     else{
       return error.error ? error.error : error.message;
     }
   }
-
 }
