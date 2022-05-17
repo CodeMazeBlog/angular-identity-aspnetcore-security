@@ -1,6 +1,6 @@
 import { Router } from '@angular/router';
-import { AuthenticationService } from './../shared/services/authentication.service';
 import { Component, OnInit } from '@angular/core';
+import { AuthenticationService } from './../shared/services/authentication.service';
 
 @Component({
   selector: 'app-menu',
@@ -8,25 +8,26 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./menu.component.css']
 })
 export class MenuComponent implements OnInit {
-  public isUserAuthenticated: boolean;
-
-  constructor(private _authService: AuthenticationService, private _router: Router) { 
-    this._authService.authChanged
+  isCollapsed: boolean = false;
+  isUserAuthenticated: boolean;
+  
+  constructor(private authService: AuthenticationService, private router: Router) {
+    this.authService.authChanged
     .subscribe(res => {
       this.isUserAuthenticated = res;
     })
-  }
+   }
 
   ngOnInit(): void {
-    this._authService.authChanged
+    this.authService.authChanged
     .subscribe(res => {
       this.isUserAuthenticated = res;
     })
   }
 
   public logout = () => {
-    this._authService.logout();
-    this._router.navigate(["/"]);
+    this.authService.logout();
+    this.router.navigate(["/"]);
   }
 
 }

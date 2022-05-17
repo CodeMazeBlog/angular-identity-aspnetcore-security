@@ -7,16 +7,15 @@ import { Router, ActivatedRoute } from '@angular/router';
   styleUrls: ['./forbidden.component.css']
 })
 export class ForbiddenComponent implements OnInit {
+  private returnUrl: string;
 
-  private _returnUrl: string;
-
-  constructor( private _router: Router, private _route: ActivatedRoute) { }
-
+  constructor( private router: Router, private route: ActivatedRoute) { }
+  
   ngOnInit(): void {
-    this._returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
-
+  
   public navigateToLogin = () => {
-    this._router.navigate(['/authentication/login'], { queryParams: { returnUrl: this._returnUrl }});
+    this.router.navigate(['/authentication/login'], { queryParams: { returnUrl: this.returnUrl }});
   }
 }
