@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using MimeKit;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace EmailService
 {
@@ -19,7 +17,7 @@ namespace EmailService
         {
             To = new List<MailboxAddress>();
 
-            To.AddRange(to.Select(x => new MailboxAddress(x)));
+            To.AddRange(to.Select(x => new MailboxAddress("email", x)));
             Subject = subject;
             Content = content;
             Attachments = attachments;

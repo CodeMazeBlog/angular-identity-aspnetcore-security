@@ -11,7 +11,7 @@ export class HomeComponent implements OnInit {
   constructor() { }
 
   ngOnInit(): void {
-    this.homeText = "WELCOME TO COMPANYEMPLOYEES CLIENT APP"
+    this.homeText = "WELCOME TO COMPANY-EMPLOYEES CLIENT APP"
   }
 
 }
