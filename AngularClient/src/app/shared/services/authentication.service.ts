@@ -1,10 +1,10 @@
 import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
-import { RegistrationResponseDto } from './../../_interfaces/response/registrationResponseDto.model';
-import { UserForAuthenticationDto } from './../../_interfaces/user/userForAuthenticationDto.model';
-import { UserForRegistrationDto } from './../../_interfaces/user/userForRegistrationDto.model';
-import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { UserForRegistrationDto } from './../../_interfaces/user/userForRegistrationDto.model'; 
+import { RegistrationResponseDto } from './../../_interfaces/response/registrationResponseDto.model';
+import { HttpClient } from '@angular/common/http';
 import { EnvironmentUrlService } from './environment-url.service';
+import { UserForAuthenticationDto } from 'src/app/_interfaces/user/userForAuthenticationDto.model';
 import { Subject } from 'rxjs';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
@@ -12,17 +12,21 @@ import { JwtHelperService } from '@auth0/angular-jwt';
   providedIn: 'root'
 })
 export class AuthenticationService {
-  private _authChangeSub = new Subject<boolean>()
-  public authChanged = this._authChangeSub.asObservable();
-  
-  constructor(private _http: HttpClient, private _envUrl: EnvironmentUrlService, private _jwtHelper: JwtHelperService) { }
+  private authChangeSub = new Subject<boolean>()
+  public authChanged = this.authChangeSub.asObservable();
+
+  constructor(private http: HttpClient, private envUrl: EnvironmentUrlService, private jwtHelper: JwtHelperService) { }
 
   public registerUser = (route: string, body: UserForRegistrationDto) => {
-    return this._http.post<RegistrationResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+    return this.http.post<RegistrationResponseDto> (this.createCompleteRoute(route, this.envUrl.urlAddress), body);
   }
 
   public loginUser = (route: string, body: UserForAuthenticationDto) => {
-    return this._http.post<AuthResponseDto>(this.createCompleteRoute(route, this._envUrl.urlAddress), body);
+    return this.http.post<AuthResponseDto>(this.createCompleteRoute(route, this.envUrl.urlAddress), body);
+  }
+
+  public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {
+    this.authChangeSub.next(isAuthenticated);
   }
 
   public logout = () => {
@@ -30,21 +34,17 @@ export class AuthenticationService {
     this.sendAuthStateChangeNotification(false);
   }
 
-  public sendAuthStateChangeNotification = (isAuthenticated: boolean) => {
-    this._authChangeSub.next(isAuthenticated);
-  }
-
   public isUserAuthenticated = (): boolean => {
     const token = localStorage.getItem("token");
  
-    return token && !this._jwtHelper.isTokenExpired(token);
+    return token && !this.jwtHelper.isTokenExpired(token);
   }
 
   public isUserAdmin = (): boolean => {
     const token = localStorage.getItem("token");
-    const decodedToken = this._jwtHelper.decodeToken(token);
+    const decodedToken = this.jwtHelper.decodeToken(token);
     const role = decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role']
-
+    
     return role === 'Administrator';
   }
 

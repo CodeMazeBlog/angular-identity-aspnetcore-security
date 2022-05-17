@@ -1,6 +1,7 @@
 import { Company } from './../../_interfaces/company.model';
 import { RepositoryService } from './../../shared/services/repository.service';
 import { Component, OnInit } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-companies',
@@ -16,11 +17,12 @@ export class CompaniesComponent implements OnInit {
     this.getCompanies();
   }
 
-  public getCompanies = () => {
+  getCompanies = () => {
     const apiAddress: string = "api/companies";
     this.repository.getData(apiAddress)
-    .subscribe(res => {
-      this.companies = res as Company[];
+    .subscribe({
+      next: (com: Company[]) => this.companies = com,
+      error: (err: HttpErrorResponse) => console.log(err)
     })
   }
 }
