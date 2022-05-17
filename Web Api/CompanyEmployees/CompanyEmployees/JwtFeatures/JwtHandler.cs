@@ -1,14 +1,9 @@
-﻿using Entities.Models;
+﻿using CompanyEmployees.Entities.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CompanyEmployees.JwtFeatures
 {
@@ -17,11 +12,12 @@ namespace CompanyEmployees.JwtFeatures
         private readonly IConfiguration _configuration;
         private readonly IConfigurationSection _jwtSettings;
         private readonly UserManager<User> _userManager;
+        
         public JwtHandler(IConfiguration configuration, UserManager<User> userManager)
         {
-            _userManager = userManager;
             _configuration = configuration;
             _jwtSettings = _configuration.GetSection("JwtSettings");
+            _userManager = userManager;
         }
 
         public SigningCredentials GetSigningCredentials()
@@ -51,10 +47,10 @@ namespace CompanyEmployees.JwtFeatures
         public JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
         {
             var tokenOptions = new JwtSecurityToken(
-                issuer: _jwtSettings.GetSection("validIssuer").Value,
-                audience: _jwtSettings.GetSection("validAudience").Value,
+                issuer: _jwtSettings["validIssuer"],
+                audience: _jwtSettings["validAudience"],
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings.GetSection("expiryInMinutes").Value)),
+                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings["expiryInMinutes"])),
                 signingCredentials: signingCredentials);
 
             return tokenOptions;

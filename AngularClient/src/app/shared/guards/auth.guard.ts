@@ -7,15 +7,15 @@ import { AuthenticationService } from '../services/authentication.service';
 })
 export class AuthGuard implements CanActivate {
 
-  constructor(private _authService: AuthenticationService, private _router: Router){}
+  constructor(private authService: AuthenticationService, private router: Router){}
 
   canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot) { 
-    if (this._authService.isUserAuthenticated()) {
+    if (this.authService.isUserAuthenticated()) {
       return true;
     }
 
-    this._router.navigate(['/authentication/login'], { queryParams: { returnUrl: state.url }});
+    this.router.navigate(['/authentication/login'], { queryParams: { returnUrl: state.url }});
+    
     return false;
-  }
-  
+  } 
 }

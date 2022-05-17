@@ -1,11 +1,8 @@
 ﻿using AutoMapper;
-using Contracts;
-using Entities.DataTransferObjects;
+using CompanyEmployees.Contracts;
+using CompanyEmployees.Entities.DataTransferObjects;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace CompanyEmployees.Controllers
 {
@@ -15,17 +12,14 @@ namespace CompanyEmployees.Controllers
     public class CompaniesController : ControllerBase
     {
         private readonly IRepositoryManager _repository;
-        private readonly ILoggerManager _logger;
         private readonly IMapper _mapper;
 
-        public CompaniesController(IRepositoryManager repository, ILoggerManager logger, IMapper mapper)
+        public CompaniesController(IRepositoryManager repository, IMapper mapper)
         {
             _repository = repository;
-            _logger = logger;
             _mapper = mapper;
         }
 
-        //[Authorize]
         [HttpGet]
         public IActionResult GetCompanies()
         {
@@ -41,7 +35,6 @@ namespace CompanyEmployees.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Something went wrong in the {nameof(GetCompanies)} action {ex}");
                 return StatusCode(500, "Internal server error");
             }
         }

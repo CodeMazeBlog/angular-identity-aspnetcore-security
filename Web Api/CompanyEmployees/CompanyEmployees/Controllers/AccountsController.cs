@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
+using CompanyEmployees.Entities.DataTransferObjects;
+using CompanyEmployees.Entities.Models;
 using CompanyEmployees.JwtFeatures;
 using EmailService;
-using Entities.DTO;
-using Entities.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
-using NETCore.MailKit.Core;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace CompanyEmployees.Controllers
 {
@@ -20,12 +14,13 @@ namespace CompanyEmployees.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly UserManager<User> _userManager; 
+        private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
         private readonly JwtHandler _jwtHandler;
         private readonly IEmailSender _emailSender;
 
-        public AccountsController(UserManager<User> userManager, IMapper mapper, JwtHandler jwtHandler, IEmailSender emailSender) 
+        public AccountsController(UserManager<User> userManager, IMapper mapper, JwtHandler jwtHandler,
+            IEmailSender emailSender)
         {
             _userManager = userManager;
             _mapper = mapper;
@@ -33,37 +28,36 @@ namespace CompanyEmployees.Controllers
             _emailSender = emailSender;
         }
 
-        [HttpPost("Registration")] 
-        public async Task<IActionResult> RegisterUser([FromBody] UserForRegistrationDto userForRegistration) 
+        [HttpPost("Registration")]
+        public async Task<IActionResult> RegisterUser([FromBody] UserForRegistrationDto userForRegistration)
         {
-            if (userForRegistration == null || !ModelState.IsValid) 
-                return BadRequest(); 
-            
-            var user = _mapper.Map<User>(userForRegistration);
+            if (userForRegistration == null || !ModelState.IsValid)
+                return BadRequest();
 
-            var result = await _userManager.CreateAsync(user, userForRegistration.Password); 
-            if (!result.Succeeded) 
-            { 
-                var errors = result.Errors.Select(e => e.Description); 
-                
-                return BadRequest(new RegistrationResponseDto { Errors = errors }); 
+            var user = _mapper.Map<User>(userForRegistration);
+            var result = await _userManager.CreateAsync(user, userForRegistration.Password);
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description);
+
+                return BadRequest(new RegistrationResponseDto { Errors = errors });
             }
 
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-            var param = new Dictionary<string, string>
+            var param = new Dictionary<string, string?>
             {
                 {"token", token },
                 {"email", user.Email }
             };
 
             var callback = QueryHelpers.AddQueryString(userForRegistration.ClientURI, param);
-
-            var message = new Message(new string[] { "codemazetest@gmail.com" }, "Email Confirmation token", callback, null);
+            
+            var message = new Message(new string[] { user.Email }, "Email Confirmation token", callback, null);
             await _emailSender.SendEmailAsync(message);
 
             await _userManager.AddToRoleAsync(user, "Viewer");
 
-            return StatusCode(201); 
+            return StatusCode(201);
         }
 
         [HttpPost("Login")]
@@ -75,7 +69,7 @@ namespace CompanyEmployees.Controllers
 
             if (!await _userManager.IsEmailConfirmedAsync(user))
                 return Unauthorized(new AuthResponseDto { ErrorMessage = "Email is not confirmed" });
-
+            
             if (!await _userManager.CheckPasswordAsync(user, userForAuthentication.Password))
                 return Unauthorized(new AuthResponseDto { ErrorMessage = "Invalid Authentication" });
 
@@ -97,23 +91,23 @@ namespace CompanyEmployees.Controllers
             if (user == null)
                 return BadRequest("Invalid Request");
 
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);         
-            var param = new Dictionary<string, string>
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            var param = new Dictionary<string, string?>
             {
                 {"token", token },
                 {"email", forgotPasswordDto.Email }
             };
 
             var callback = QueryHelpers.AddQueryString(forgotPasswordDto.ClientURI, param);
+            var message = new Message(new string[] { user.Email }, "Reset password token", callback, null);
 
-            var message = new Message(new string[] { "codemazetest@gmail.com" }, "Reset password token", callback, null);
             await _emailSender.SendEmailAsync(message);
-
+            
             return Ok();
         }
 
         [HttpPost("ResetPassword")]
-        public async Task<IActionResult> ResetPassword([FromBody]ResetPasswordDto resetPasswordDto)
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto resetPasswordDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest();
@@ -121,15 +115,15 @@ namespace CompanyEmployees.Controllers
             var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email);
             if (user == null)
                 return BadRequest("Invalid Request");
-
+            
             var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPasswordDto.Token, resetPasswordDto.Password);
             if (!resetPassResult.Succeeded)
             {
                 var errors = resetPassResult.Errors.Select(e => e.Description);
-
+                
                 return BadRequest(new { Errors = errors });
             }
-
+            
             return Ok();
         }
 
@@ -143,7 +137,7 @@ namespace CompanyEmployees.Controllers
             var confirmResult = await _userManager.ConfirmEmailAsync(user, token);
             if (!confirmResult.Succeeded)
                 return BadRequest("Invalid Email Confirmation Request");
-
+            
             return Ok();
         }
     }
