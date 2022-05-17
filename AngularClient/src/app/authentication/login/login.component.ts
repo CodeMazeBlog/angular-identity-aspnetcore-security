@@ -1,3 +1,5 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
 import { UserForAuthenticationDto } from './../../_interfaces/user/userForAuthenticationDto.model';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthenticationService } from './../../shared/services/authentication.service';
@@ -10,55 +12,57 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  public loginForm: FormGroup;
-  public errorMessage: string = '';
-  public showError: boolean;
-  private _returnUrl: string;
+  private returnUrl: string;
 
-  constructor(private _authService: AuthenticationService, private _router: Router, private _route: ActivatedRoute) { }
+  loginForm: FormGroup;
+  errorMessage: string = '';
+  showError: boolean;
+
+  constructor(private authService: AuthenticationService, private router: Router, private route: ActivatedRoute) { }
 
   ngOnInit(): void {
     this.loginForm = new FormGroup({
       username: new FormControl("", [Validators.required]),
       password: new FormControl("", [Validators.required])
     })
-
-    this._returnUrl = this._route.snapshot.queryParams['returnUrl'] || '/';
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
 
-  public validateControl = (controlName: string) => {
-    return this.loginForm.controls[controlName].invalid && this.loginForm.controls[controlName].touched
+  validateControl = (controlName: string) => {
+    return this.loginForm.get(controlName).invalid && this.loginForm.get(controlName).touched
   }
 
-  public hasError = (controlName: string, errorName: string) => {
-    return this.loginForm.controls[controlName].hasError(errorName)
+  hasError = (controlName: string, errorName: string) => {
+    return this.loginForm.get(controlName).hasError(errorName)
   }
 
-  public loginUser = (loginFormValue) => {
+  loginUser = (loginFormValue) => {
     this.showError = false;
-    const login = {... loginFormValue };
+    const login = { ...loginFormValue };
+
     const userForAuth: UserForAuthenticationDto = {
       email: login.username,
       password: login.password,
       clientURI: 'http://localhost:4200/authentication/forgotpassword'
     }
 
-    this._authService.loginUser('api/accounts/login', userForAuth)
-    .subscribe(res => {
-      if(res.is2StepVerificationRequired) {
-        this._router.navigate(['/authentication/twostepverification'], 
-          { queryParams: { returnUrl: this._returnUrl, provider: res.provider, email: userForAuth.email }});
-      }
-      else {
-        localStorage.setItem("token", res.token);
-        this._authService.sendAuthStateChangeNotification(res.isAuthSuccessful);
-        this._router.navigate([this._returnUrl]);
-      }
-    },
-    (error) => {
-      this.errorMessage = error;
-      this.showError = true;
-    })
+    this.authService.loginUser('api/accounts/login', userForAuth)
+      .subscribe({
+        next: (res: AuthResponseDto) => {
+          if (res.is2StepVerificationRequired) {
+            this.router.navigate(['/authentication/twostepverification'],
+              { queryParams: { returnUrl: this.returnUrl, provider: res.provider, email: userForAuth.email } })
+          }
+          else {
+            localStorage.setItem("token", res.token);
+            this.authService.sendAuthStateChangeNotification(res.isAuthSuccessful);
+            this.router.navigate([this.returnUrl]);
+          }
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMessage = err.message;
+          this.showError = true;
+        }
+      })
   }
-
 }
