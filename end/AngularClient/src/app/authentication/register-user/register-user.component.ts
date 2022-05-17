@@ -1,6 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { Component, OnInit } from '@angular/core';
 import { UserForRegistrationDto } from './../../_interfaces/user/userForRegistrationDto.model';
 import { AuthenticationService } from './../../shared/services/authentication.service';
-import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
@@ -9,9 +10,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
   styleUrls: ['./register-user.component.css']
 })
 export class RegisterUserComponent implements OnInit {
-  public registerForm: FormGroup;
+  registerForm: FormGroup;
 
-  constructor(private _authService: AuthenticationService) { }
+  constructor(private authService: AuthenticationService) { }
 
   ngOnInit(): void {
     this.registerForm = new FormGroup({
@@ -24,11 +25,11 @@ export class RegisterUserComponent implements OnInit {
   }
 
   public validateControl = (controlName: string) => {
-    return this.registerForm.controls[controlName].invalid && this.registerForm.controls[controlName].touched
+    return this.registerForm.get(controlName).invalid && this.registerForm.get(controlName).touched
   }
 
   public hasError = (controlName: string, errorName: string) => {
-    return this.registerForm.controls[controlName].hasError(errorName)
+    return this.registerForm.get(controlName).hasError(errorName)
   }
 
   public registerUser = (registerFormValue) => {
@@ -42,12 +43,10 @@ export class RegisterUserComponent implements OnInit {
       confirmPassword: formValues.confirm
     };
 
-    this._authService.registerUser("api/accounts/registration", user)
-    .subscribe(_ => {
-      console.log("Successful registration");
-    },
-    error => {
-      console.log(error.error.errors);
+    this.authService.registerUser("api/accounts/registration", user)
+    .subscribe({
+      next: (_) => console.log("Successful registration"),
+      error: (err: HttpErrorResponse) => console.log(err.error.errors)
     })
   }
 }
