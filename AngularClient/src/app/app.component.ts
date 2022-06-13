@@ -7,12 +7,12 @@ import { AuthenticationService } from './shared/services/authentication.service'
   styleUrls: ['./app.component.css']
 })
 export class AppComponent implements OnInit {
-  title = 'CompanyEmployees.Client.Oidc';
+  title = 'AngularClient';
 
-  constructor(private _authService: AuthenticationService){}
-
+  constructor(private authService: AuthenticationService){}
+  
   ngOnInit(): void {
-    if(this._authService.isUserAuthenticated())
-      this._authService.sendAuthStateChangeNotification(true);
+    if(this.authService.isUserAuthenticated())
+      this.authService.sendAuthStateChangeNotification(true);
   }
 }

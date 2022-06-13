@@ -7,17 +7,16 @@ import { RepositoryService } from '../shared/services/repository.service';
   styleUrls: ['./privacy.component.css']
 })
 export class PrivacyComponent implements OnInit {
+  claims: [] = [];
 
-  public claims: [] = [];
-
-  constructor(private _repository: RepositoryService) { }
-
+  constructor(private repository: RepositoryService) { }
+  
   ngOnInit(): void {
     this.getClaims();
   }
-
-  public getClaims = () =>{
-    this._repository.getData('api/companies/privacy')
+  
+  private getClaims = () =>{
+    this.repository.getClaims('api/companies/privacy')
     .subscribe(res => {
       this.claims = res as [];
     })

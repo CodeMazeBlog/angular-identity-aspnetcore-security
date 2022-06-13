@@ -5,7 +5,11 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { RouterModule } from '@angular/router'
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 import { JwtModule } from "@auth0/angular-jwt";
+import { SocialLoginModule, SocialAuthServiceConfig } from '@abacritt/angularx-social-login'; 
+import { GoogleLoginProvider } from '@abacritt/angularx-social-login';
  
 import { AppComponent } from './app.component';
 import { HomeComponent } from './home/home.component';
@@ -13,10 +17,7 @@ import { MenuComponent } from './menu/menu.component';
 import { NotFoundComponent } from './error-pages/not-found/not-found.component';
 import { PrivacyComponent } from './privacy/privacy.component';
 import { ForbiddenComponent } from './forbidden/forbidden.component';
-
-import { SocialLoginModule, SocialAuthServiceConfig } from 'angularx-social-login';
-import { GoogleLoginProvider } from 'angularx-social-login';
-
+ 
 export function tokenGetter() {
   return localStorage.getItem("token");
 }
@@ -33,22 +34,24 @@ export function tokenGetter() {
   imports: [
     BrowserModule,
     HttpClientModule,
+    BrowserAnimationsModule,
     SocialLoginModule,
+    CollapseModule.forRoot(),
     RouterModule.forRoot([
       { path: 'home', component: HomeComponent },
       { path: 'company', loadChildren: () => import('./company/company.module').then(m => m.CompanyModule), canActivate: [AuthGuard] },
       { path: 'authentication', loadChildren: () => import('./authentication/authentication.module').then(m => m.AuthenticationModule) },
       { path: 'privacy', component: PrivacyComponent, canActivate: [AuthGuard, AdminGuard] },
-      { path: 'forbidden', component: ForbiddenComponent },
       { path: '404', component : NotFoundComponent},
+      { path: 'forbidden', component: ForbiddenComponent },
       { path: '', redirectTo: '/home', pathMatch: 'full' },
       { path: '**', redirectTo: '/404', pathMatch: 'full'}
     ]),
     JwtModule.forRoot({
       config: {
         tokenGetter: tokenGetter,
-        whitelistedDomains: ["localhost:5001"],
-        blacklistedRoutes: []
+        allowedDomains: ["localhost:5001"],
+        disallowedRoutes: []
       }
     })
   ],
@@ -66,10 +69,16 @@ export function tokenGetter() {
           {
             id: GoogleLoginProvider.PROVIDER_ID,
             provider: new GoogleLoginProvider(
-              '883654869277-m2mlgsroh8vsmt0tg82lmo4cnt0cuqs3.apps.googleusercontent.com'
+              '465156464629-1bsjrh3ujigm0aksldsjofqe8svahtgt.apps.googleusercontent.com', {
+                scope: 'email',
+                plugin_name: 'LoginProject'
+              }
             )
           },
         ],
+        onError: (err) => {
+          console.error(err);
+        }
       } as SocialAuthServiceConfig
     }
   ],

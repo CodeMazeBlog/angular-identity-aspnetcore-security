@@ -1,5 +1,5 @@
 export interface TwoFactorDto {
-    email: string;
-    provider: string;
-    token: string;
+  email: string;
+  provider: string;
+  token: string;
 }
