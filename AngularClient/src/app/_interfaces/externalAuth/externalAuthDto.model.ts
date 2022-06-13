@@ -1,4 +1,4 @@
 export interface ExternalAuthDto {
-    provider: string;
-    idToken: string;
+  provider: string;
+  idToken: string;
 }

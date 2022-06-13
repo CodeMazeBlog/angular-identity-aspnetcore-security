@@ -1,3 +1,5 @@
+import { AuthResponseDto } from './../../_interfaces/response/authResponseDto.model';
+import { HttpErrorResponse } from '@angular/common/http';
 import { TwoFactorDto } from './../../_interfaces/twoFactor/twoFactorDto.model';
 import { AuthenticationService } from './../../shared/services/authentication.service';
 import { Component, OnInit } from '@angular/core';
@@ -10,55 +12,57 @@ import { ActivatedRoute, Router } from '@angular/router';
   styleUrls: ['./two-step-verification.component.css']
 })
 export class TwoStepVerificationComponent implements OnInit {
-
-  public twoStepForm: FormGroup;
-  public showError: boolean;
-  public errorMessage: string;
-
-  private _provider: string;
-  private _email: string;
-  private _returnUrl: string;
-
-  constructor(private _authService: AuthenticationService, private _route: ActivatedRoute, 
-    private _router: Router) { }
-
+  private provider: string;
+  private email: string;
+  private returnUrl: string;
+  
+  twoStepForm: FormGroup;
+  showError: boolean;
+  errorMessage: string;
+  
+  constructor(private authService: AuthenticationService, private route: ActivatedRoute, 
+    private router: Router) { }
+    
   ngOnInit(): void {
     this.twoStepForm = new FormGroup({
       twoFactorCode: new FormControl('', [Validators.required]),
     });
     
-      this._provider = this._route.snapshot.queryParams['provider'];
-      this._email = this._route.snapshot.queryParams['email'];
-      this._returnUrl = this._route.snapshot.queryParams['returnUrl'];
+      this.provider = this.route.snapshot.queryParams['provider'];
+      this.email = this.route.snapshot.queryParams['email'];
+      this.returnUrl = this.route.snapshot.queryParams['returnUrl'];
   }
 
-  public validateControl = (controlName: string) => {
-    return this.twoStepForm.controls[controlName].invalid && this.twoStepForm.controls[controlName].touched
+  validateControl = (controlName: string) => {
+    return this.twoStepForm.get(controlName).invalid && this.twoStepForm.get(controlName).touched
   }
 
-  public hasError = (controlName: string, errorName: string) => {
-    return this.twoStepForm.controls[controlName].hasError(errorName)
+  hasError = (controlName: string, errorName: string) => {
+    return this.twoStepForm.get(controlName).hasError(errorName)
   }
 
-  public loginUser = (twoStepFromValue) => {
+  loginUser = (twoStepFromValue) => {
     this.showError = false;
     
     const formValue = { ...twoStepFromValue };
+
     let twoFactorDto: TwoFactorDto = {
-      email: this._email,
-      provider: this._provider,
+      email: this.email,
+      provider: this.provider,
       token: formValue.twoFactorCode
     }
 
-    this._authService.twoStepLogin('api/accounts/twostepverification', twoFactorDto)
-    .subscribe(res => {
-      localStorage.setItem("token", res.token);
-      this._authService.sendAuthStateChangeNotification(res.isAuthSuccessful);
-      this._router.navigate([this._returnUrl]);
-    },
-    error => {
-      this.errorMessage = error;
-      this.showError = true;
+    this.authService.twoStepLogin('api/accounts/twostepverification', twoFactorDto)
+    .subscribe({
+      next: (res:AuthResponseDto) => {
+        localStorage.setItem("token", res.token);
+        this.authService.sendAuthStateChangeNotification(res.isAuthSuccessful);
+        this.router.navigate([this.returnUrl]);
+      },
+      error: (err: HttpErrorResponse) => {
+        this.errorMessage = err.message;
+        this.showError = true;
+      }
     })
-  }
+  }  
 }

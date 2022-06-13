@@ -1,4 +1,3 @@
-import { SocialAuthService } from 'angularx-social-login';
 import { Router } from '@angular/router';
 import { Component, OnInit } from '@angular/core';
 import { AuthenticationService } from './../shared/services/authentication.service';
@@ -9,12 +8,11 @@ import { AuthenticationService } from './../shared/services/authentication.servi
   styleUrls: ['./menu.component.css']
 })
 export class MenuComponent implements OnInit {
-  public isUserAuthenticated: boolean;
-  public isExternalAuth: boolean;
-
-  constructor(private _authService: AuthenticationService, private _router: Router, 
-    private _socialAuthService: SocialAuthService) { 
-    this._authService.authChanged
+  isCollapsed: boolean = false;
+  isUserAuthenticated: boolean;
+  
+  constructor(private authService: AuthenticationService, private router: Router) {
+    this.authService.authChanged
     .subscribe(res => {
       this.isUserAuthenticated = res;
     })
@@ -25,19 +23,15 @@ export class MenuComponent implements OnInit {
     .subscribe(res => {
       this.isUserAuthenticated = res;
     })
-
-    this._socialAuthService.authState.subscribe(user => {
-      this.isExternalAuth = user != null;
-    })
   }
 
   public logout = () => {
-    this._authService.logout();
+    this.authService.logout();
 
-    if(this.isExternalAuth)
-      this._authService.signOutExternal();
+    if(this.authService.isExternalAuth)
+      this.authService.signOutExternal();
 
-    this._router.navigate(["/"]);
+    this.router.navigate(["/"]);
   }
 
 }

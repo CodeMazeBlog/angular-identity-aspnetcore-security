@@ -13,7 +13,14 @@ import { TwoStepVerificationComponent } from './two-step-verification/two-step-v
 
 
 @NgModule({
-  declarations: [RegisterUserComponent, LoginComponent, ForgotPasswordComponent, ResetPasswordComponent, EmailConfirmationComponent, TwoStepVerificationComponent],
+  declarations: [
+    RegisterUserComponent,
+    LoginComponent,
+    ForgotPasswordComponent,
+    ResetPasswordComponent,
+    EmailConfirmationComponent,
+    TwoStepVerificationComponent
+  ],
   imports: [
     CommonModule,
     ReactiveFormsModule,
