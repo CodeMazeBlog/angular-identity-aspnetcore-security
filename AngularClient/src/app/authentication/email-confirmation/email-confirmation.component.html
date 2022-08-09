@@ -1,0 +1,11 @@
+<div class="card">
+  <div class="card-body">
+      <h1 class="card-title">Email Confirmation</h1>
+      <div *ngIf="showError" class="alert alert-danger" role="alert">
+          {{errorMessage}}
+      </div>
+      <div *ngIf="showSuccess" class="alert alert-success" role="alert">
+          Your email has been successfully confirmed. Please <a [routerLink]="['/authentication/login']"> click here to log in. </a>
+      </div>
+  </div>
+</div>
